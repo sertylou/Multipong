@@ -11,7 +11,8 @@ package
 	
 	public class Ball extends Sprite 
 	{
-		
+		public var PutoAlberto : String = "Puto jefe";		
+
 		public var Speed : Number;
 		public var Refraction : Number =0.5;
 		
