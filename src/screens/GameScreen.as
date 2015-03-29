@@ -32,16 +32,24 @@ package screens
 		private function comprobarColisiones (event:Event) : void
 		{
 			if (imageCollision (leftStick, ball))
-				ball.Chocar (ball.CollidesWith (leftStick));
+				ball.CollideWith (leftStick);
+			else
+				ball.EndCollisionWith (leftStick);
 			
 			if (imageCollision (rightStick, ball))
-				ball.Chocar (ball.CollidesWith (rightStick));
+				ball.CollideWith (rightStick);
+			else
+				ball.EndCollisionWith (rightStick);
 			
 			if (imageCollision (topStick, ball))
-				ball.Chocar (ball.CollidesWith (topStick));
+				ball.CollideWith (topStick);
+			else
+				ball.EndCollisionWith (topStick);
 			
 			if (imageCollision (bottomStick, ball))
-				ball.Chocar (ball.CollidesWith (bottomStick));
+				ball.CollideWith (bottomStick);
+			else
+				ball.EndCollisionWith (bottomStick);
 		}
 		
 		private function devolverPelota (event:Event) : void

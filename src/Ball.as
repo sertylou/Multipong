@@ -11,7 +11,6 @@ package
 	
 	public class Ball extends Sprite 
 	{
-		public var PutoAlberto : String = "Puto jefe";		
 
 		public var Speed : Number;
 		public var Refraction : Number =0.5;
@@ -32,26 +31,37 @@ package
 		}
 		
 		private var picture: Image;
-		public function set Picture (pic:Texture) { picture.texture = pic; }
+		public function set Picture (pic:Texture) : void { picture.texture = pic; }
 		
 		private var timer : Number = 0;
 		private var timeToIncrease : Number = 3;
 		private var speedIncrease : Number = 0.05;
 		private var initialSpeed : Number = 2;
-		public function ResetSpeed () { Speed = initialSpeed; }
-		
-		// Security timers
-		/* One problem we may have is the ball collisioning more than once. When the ball touches the stick, the collision detection
-		 * may be faster than the time the ball requires to reboot. So we set some timers which will activate themselves when the ball
-		 * bumps, in the X axis or Y axis, and will give some time to the ball to detect collision in that axis again. */
-		private var timerX : int;
-		private var timerY : int;
-		private var securityTime : int = 10;
-		private var securityX : Boolean;
-		private var securityY : Boolean;
+		public function ResetSpeed () : void{ Speed = initialSpeed; }
 		
 		// Collisions
-		private var collisions : Vector.<Sprite>;
+		private var collisions : Vector.<Sprite> = new <Sprite>[];
+		public function InCollisionWith (other:Sprite) : Boolean
+		{
+			if (collisions.indexOf(other) == -1) return false;
+			return true;
+		}
+		public function StartCollisionWith (other:Sprite) : void
+		{
+			if (!InCollisionWith(other))
+				collisions.push(other);
+		} 
+		public function EndCollisionWith (other:Sprite) : void
+		{
+			for (var i:int = 0; i < collisions.length; ++i)
+			{
+				if (collisions[i] == other)
+				{
+					collisions.splice (i, 1);
+					break;
+				}
+			}
+		}
 		
 		public function Ball(posX : int, posY : int, width : int, height : int, pic : Texture) 
 		{
@@ -69,26 +79,6 @@ package
 			this.addChild(picture);
 			
 			this.addEventListener(starling.events.Event.ENTER_FRAME, Move);
-			this.addEventListener(starling.events.Event.ENTER_FRAME, securityTimers);
-		}
-		
-		private function securityTimers () : void
-		{
-			if (timerX >= securityTime)
-			{
-				timerX = 0;
-				securityX = false;
-			}
-			if (securityX)
-				++timerX;
-				
-			if (timerY >= securityTime)
-			{
-				timerY = 0;
-				securityY = false;
-			}
-			if (securityY)
-				++timerY;
 		}
 		
 		public function Move(event:Event) : void
@@ -106,32 +96,35 @@ package
 		
 		public function Chocar(Sense : String) : void
 		{
-			if (Sense == "side" && !securityX) {	
+			if (Sense == "side") {	
 				movementX = 2 * (1 - Refraction) * (-senseX);
 				movementY = 2 * Refraction * senseY;
-				securityX = true;
 			}
-			else if (!securityY){
+			else {
 				movementX = 2 * Refraction * senseX;
 				movementY = 2 * (1 - Refraction) * ( -senseY);
-				securityY = true;
 			}
 		}
 		
 		
-		public function CollidesWith (other:Sprite) : String
+		public function CollideWith (other:Sprite) : void
 		{
-			if (senseX == 1)
+			if (!InCollisionWith (other))
 			{
-				var suposedY : int = int(Abs(x - other.x) * (movementY / movementX) * senseY + y);
-				if (suposedY > other.y && suposedY < other.y + other.height) return "side";
-				return "plane";
-			}
-			else
-			{
-				var suposedY : int = int(Abs(x - other.x + other.width) * (movementY / movementX) * senseY + y);
-				if (suposedY > other.y && suposedY < other.y + other.height) return "side";
-				return "plane";
+				if (senseX == 1)
+				{
+					var suposedY : int = int(Abs(x - other.x) * (movementY / movementX) * senseY + y);
+					if (suposedY > other.y && suposedY < other.y + other.height) Chocar ("side");
+					else Chocar("plane");
+				}
+				else
+				{
+					var suposedY : int = int(Abs(x - other.x + other.width) * (movementY / movementX) * senseY + y);
+					if (suposedY > other.y && suposedY < other.y + other.height) Chocar("side");
+					else Chocar("plane");
+				}
+				
+				StartCollisionWith (other);
 			}
 		}
 		
