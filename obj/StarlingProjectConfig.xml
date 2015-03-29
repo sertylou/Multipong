@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'26/03/2015'</value>
+      <value>'29/03/2015'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -33,7 +33,7 @@
     <accessible>true</accessible>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>D:\Oscar\UNI\Segundo\Juegos Web\Trabajo\Project\src</path-element>
+      <path-element>D:\Oscar\UNI\Segundo\Juegos Web\Trabajo\MultipongProjectGithub\Multipong\src</path-element>
       <path-element>C:\Libraries\ActionScript\Gamua-Starling-Framework-c414de1\starling\src</path-element>
       <path-element>C:\Libraries\ActionScript\GreenSock-AS3</path-element>
       <path-element>C:\Libraries\ActionScript\Hi-ReS-Stats-master\src</path-element>
@@ -41,7 +41,7 @@
     </source-path>
   </compiler>
   <file-specs>
-    <path-element>D:\Oscar\UNI\Segundo\Juegos Web\Trabajo\Project\src\StarlingProject.as</path-element>
+    <path-element>D:\Oscar\UNI\Segundo\Juegos Web\Trabajo\MultipongProjectGithub\Multipong\src\StarlingProject.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>
