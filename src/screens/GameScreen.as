@@ -21,12 +21,19 @@ package screens
 		private var topStick : Stick;
 		private var bottomStick : Stick;
 		
+		private var gameObjects : Vector.<Hability> = new <Hability>[];
+		private var timeToSpawn : Number = 5;
+		private var rangeTimeSpawn : int = 2;
+		private var spawnTimer  : Number = 0;
+		private var spawnArea : int = 100;
+		
 		public function GameScreen() 
 		{
 			super();
 			drawScreen();
 			addEventListener(Event.ENTER_FRAME, devolverPelota);
 			addEventListener(Event.ENTER_FRAME, comprobarColisiones);
+			addEventListener(Event.ENTER_FRAME, spawnObject);
 		}
 		
 		private function comprobarColisiones (event:Event) : void
@@ -50,12 +57,24 @@ package screens
 				ball.CollideWith (bottomStick);
 			else
 				ball.EndCollisionWith (bottomStick);
+				
+			for (var i:int = 0; i < gameObjects.length; ++i)
+			{
+				if (imageCollision(gameObjects[i], ball))
+				{
+					gameObjects[i].DoThing(ball);
+					removeChild (gameObjects[i]);
+					gameObjects.splice (i, 1);
+				}
+				else
+					ball.EndCollisionWith (bottomStick);
+			}
 		}
 		
 		private function devolverPelota (event:Event) : void
 		{
 			// Texto para mostrar cosas
-			debugg = ball.x.toString() + ":" + ball.y.toString();
+			debugg = spawnTimer.toString() + ":" + timeToSpawn.toString();
 			removeChild(debuggText);
 			debuggText = new TextField(800, 600, debugg, "Arial", 12, Color.RED);
 			this.addChild(debuggText);
@@ -109,6 +128,29 @@ package screens
 			return true;
 		}
 		
+		private function spawnObject ()
+		{
+			spawnTimer += 0.016;  // 1 seg / 60 fps
+			if (spawnTimer >= timeToSpawn)
+			{
+				var objectFunction : int = int (Random(0, 0));
+				
+				var posX : int = int (Random (spawnArea, 800 - spawnArea));
+				var posY : int = int (Random (spawnArea, 600 - spawnArea));
+				
+				var newHab : Hability = new Hability(objectFunction, posX, posY, 25, 25);
+				addChild(newHab);
+				gameObjects.push (newHab);
+				
+				timeToSpawn = Random (timeToSpawn - rangeTimeSpawn, timeToSpawn + rangeTimeSpawn);
+				spawnTimer = 0;
+			}
+		}
+		
+		function Random(min:Number, max:Number):Number {
+			var randomNum:Number = Math.floor(Math.random() * (max - min + 1)) + min;
+			return randomNum;
+		}
 	}
 
 }
