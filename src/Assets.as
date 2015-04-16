@@ -2,6 +2,7 @@ package
 {
 	import flash.display.Bitmap;
 	import flash.media.Sound;
+	import flash.media.SoundChannel;
 	import flash.utils.Dictionary;
 	import starling.textures.Texture;
 	public class Assets 
@@ -12,8 +13,17 @@ package
 		[Embed(source = "../media/pictures/Black.jpg")]
 		public static const StickPic:Class;
 		
-		private static var gameTextures:Dictionary = new Dictionary();
+		[Embed(source = "../media/pictures/Block.png")]
+		public static const BloquePic:Class;
 		
+		[Embed(source = "../media/pictures/SpeedRay.jpg")]
+		public static const SpeedRayPic:Class;
+		
+		[Embed(source = "../media/pictures/FireBall.jpg")]
+		public static const FireballPic:Class;
+		
+		private static var gameTextures:Dictionary = new Dictionary();
+		                   
 		public static function getTexture (name:String):Texture
 		{
 			if (gameTextures[name] == undefined)
@@ -25,9 +35,9 @@ package
 		}
 		
 		// Sonidos-------------------------------
-		
-		/*[Embed(source = "../media/sounds/A.wav")]
-		public static const DoAlto:Class;
+		/*
+		[Embed(source = "../media/sounds/A.wav")]
+		public static const Do:Class;
 		
 		[Embed(source = "../media/sounds/B.wav")]
 		public static const Re:Class;
@@ -47,10 +57,7 @@ package
 		[Embed(source = "../media/sounds/G.wav")]
 		public static const Si:Class;
 		
-		/*[Embed(source = "../media/sounds/DoBajo.mp3")]
-		public static const DoBajo:Class;*/
-		
-		/*private static var gameSounds:Dictionary = new Dictionary();
+		private static var gameSounds:Dictionary = new Dictionary();
 		
 		public static function GetSound (name:String):Sound
 		{

@@ -79,6 +79,9 @@
     <asset path="media\sounds\E.wav" />
     <asset path="media\sounds\F.wav" />
     <asset path="media\sounds\G.wav" />
+    <asset path="media\pictures\Block.png" />
+    <asset path="media\pictures\SpeedRay.jpg" />
+    <asset path="media\pictures\FireBall.jpg" />
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>

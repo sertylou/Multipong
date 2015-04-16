@@ -12,85 +12,82 @@ package screens
 	
 	public class GameScreen extends Sprite 
 	{
+		//************** ATRIBUTOS *********************************
+		
+		// Variables para el texto que sale en pantalla que nos sirve para
+		// ver valores e identificar errores a modo de debugg
 		private var debugg:String = "Hola mundo";
 		private var debuggText : TextField;
 		
-		private var ball:Ball;
+		// Pelotas en el juego
+		private var balls : Vector.<Ball> = new <Ball>[];
+		
+		// Palas del jugador
 		private var leftStick : Stick;
 		private var rightStick : Stick;
 		private var topStick : Stick;
 		private var bottomStick : Stick;
 		
+		// Objetos que aparecen en el juego
 		private var gameObjects : Vector.<Hability> = new <Hability>[];
+		// Tiempo para spawnear un nuevo objeto
 		private var timeToSpawn : Number = 5;
+		// Tiempo base para spawnear (mirar la siguiente variable)
+		private var initialTimeToSpawn : Number = 5;
+		// Cantidad de segundos que puede variar el tiempo para spawnear objetos
+		// es decir, cada vez que aparezca un nuevo objeto en la escena, se vuelve
+		// a calcular "timeToSpawn", el tiempo que tiene que transcurrir para spawnear,
+		// de esta forma el tiempo para generar objetos varia entre:
+		// initialTimeToSpawn - rango y initialTimeToSpawn + rango
 		private var rangeTimeSpawn : int = 2;
+		// Temporizador que se incrementa cada frame y que se compara con timeToSpawn
 		private var spawnTimer  : Number = 0;
-		private var spawnArea : int = 100;
+		// Los objetos que se generan en la escena se pueden generar en el area comprimida por
+		//  X (spawnArea, Width - spawnArea)
+		//  Y (spawnArea, Height - spawnArea)
+		// en otras palabras, spawnArea es el margen hasta el límite de la pantalla
+		private var spawnArea : int = 150;
+		
+		// Tiempo para generar pelota nueva (este no varia)
+		private var timeToSpawnBall : Number = 4;
+		// Temporizador que se va incrementando
+		private var ballSpawnerTime : Number = 5;
+		
+		//************* CONSTRUCTOR ****************************************
 		
 		public function GameScreen() 
 		{
 			super();
+			// Dibujar palas
 			drawScreen();
-			addEventListener(Event.ENTER_FRAME, devolverPelota);
+			
+			// Devolver pelota al centro o eliminarla al salirse
+			//addEventListener(Event.ENTER_FRAME, devolverPelota);
+			
+			// comprobar colisiones entre las pelotas y otros
 			addEventListener(Event.ENTER_FRAME, comprobarColisiones);
+			// generar objetos en la escena
 			addEventListener(Event.ENTER_FRAME, spawnObject);
+			// generar bolas en la escena
+			addEventListener(Event.ENTER_FRAME, spawnBall);
+			// mostrar texto de debbugg en la escena (quitar al acabar el juego)
+			addEventListener(Event.ENTER_FRAME, DebuggText);
 		}
 		
-		private function comprobarColisiones (event:Event) : void
-		{
-			if (imageCollision (leftStick, ball))
-				ball.CollideWith (leftStick);
-			else
-				ball.EndCollisionWith (leftStick);
-			
-			if (imageCollision (rightStick, ball))
-				ball.CollideWith (rightStick);
-			else
-				ball.EndCollisionWith (rightStick);
-			
-			if (imageCollision (topStick, ball))
-				ball.CollideWith (topStick);
-			else
-				ball.EndCollisionWith (topStick);
-			
-			if (imageCollision (bottomStick, ball))
-				ball.CollideWith (bottomStick);
-			else
-				ball.EndCollisionWith (bottomStick);
-				
-			for (var i:int = 0; i < gameObjects.length; ++i)
-			{
-				if (imageCollision(gameObjects[i], ball))
-				{
-					gameObjects[i].DoThing(ball);
-					removeChild (gameObjects[i]);
-					gameObjects.splice (i, 1);
-				}
-				else
-					ball.EndCollisionWith (bottomStick);
-			}
-		}
+		//*************** SYSTEM FUNCTIONALITY **************************
 		
-		private function devolverPelota (event:Event) : void
+		private function DebuggText () : void
 		{
 			// Texto para mostrar cosas
-			debugg = spawnTimer.toString() + ":" + timeToSpawn.toString();
 			removeChild(debuggText);
+			debugg = "Hola";
 			debuggText = new TextField(800, 600, debugg, "Arial", 12, Color.RED);
 			this.addChild(debuggText);
-			
-			if (ball.x < 0 || ball.x > 800 || ball.y < 0 || ball.y > 600) 
-			{
-				ball.x = width/2;
-				ball.y = height / 2;
-				ball.ResetSpeed();
-			}
 		}
 		
+				// dibujar palas
 		private function drawScreen():void
 		{
-			ball = new Ball(400, 300, 25, 25, Assets.getTexture("BallPic"));
-			this.addChild(ball);
 			
 			// Dimensiones de las palas
 			var stickWidth : int = 200;
@@ -113,44 +110,126 @@ package screens
 			
 		}
 		
-		// Comprueba si dos objetos colisionan
-		private function imageCollision (pic1:Sprite, pic2:Sprite) : Boolean
-		{
-			if (pic1.x > pic2.x + pic2.width)
-				return false;
-			if (pic1.x + pic1.width < pic2.x)
-				return false;
-			if (pic1.y > pic2.y + pic2.width)
-				return false;
-			if (pic1.y + pic1.height < pic2.y)
-				return false;
-			
-			return true;
-		}
+		//********** CONTROL PELOTA **************************
 		
-		private function spawnObject ()
+		// comprobar colisiones entre la pelota y lo demás
+		private function comprobarColisiones (event:Event) : void
 		{
-			spawnTimer += 0.016;  // 1 seg / 60 fps
-			if (spawnTimer >= timeToSpawn)
+			for (var i:int = 0; i < balls.length; ++i)
 			{
-				var objectFunction : int = int (Random(0, 0));
+				var ball : Ball = balls[i];
 				
-				var posX : int = int (Random (spawnArea, 800 - spawnArea));
-				var posY : int = int (Random (spawnArea, 600 - spawnArea));
-				
-				var newHab : Hability = new Hability(objectFunction, posX, posY, 25, 25);
-				addChild(newHab);
-				gameObjects.push (newHab);
-				
-				timeToSpawn = Random (timeToSpawn - rangeTimeSpawn, timeToSpawn + rangeTimeSpawn);
-				spawnTimer = 0;
+				// Si no está ya colisionando
+				if (!ball.IsColliding())
+				{
+					// Si colisiona con la pala izquierda
+					if (MyFunctions.imageCollision (leftStick, ball))
+					{
+						// Colisionar con ella
+						ball.CollideWith (leftStick);
+						continue;
+					}
+					
+					if (MyFunctions.imageCollision (rightStick, ball))
+					{
+						ball.CollideWith (rightStick);
+						continue;
+					}
+					
+					if (MyFunctions.imageCollision (topStick, ball))
+					{
+						ball.CollideWith (topStick);
+						continue;
+					}
+					
+					if (MyFunctions.imageCollision (bottomStick, ball))
+					{
+						ball.CollideWith (bottomStick);
+						continue;
+					}
+					
+					// Comprobar colision con cada una de las otras pelotas
+					var j : int = 0;
+					
+					for (j = 0; j < balls.length; ++j)
+					{
+						if (j != i && MyFunctions.imageCollision(balls[j], ball))
+						{
+							ball.CollideWith (balls[i]);
+							balls[i].CollideWith (ball);
+							continue;
+						}
+					}
+						
+					// Comprobar colision con los objetos
+					for (j = 0; j < gameObjects.length; ++j)
+					{
+						if (MyFunctions.imageCollision(gameObjects[j], ball))
+						{
+							gameObjects[j].DoThing(ball);
+							removeChild (gameObjects[j]);
+							gameObjects.splice (j, 1);
+						}
+					}
+				}
 			}
 		}
 		
-		function Random(min:Number, max:Number):Number {
-			var randomNum:Number = Math.floor(Math.random() * (max - min + 1)) + min;
-			return randomNum;
+		// quitar pelota del juego si se sale
+		private function quitarPelotas (event:Event) : void
+		{
+			for (var i:int = 0; i < balls.length; ++i)
+			{
+				var ball:Ball = balls[i];
+				if (ball.x < 0 || ball.x > 800 || ball.y < 0 || ball.y > 600) 
+				{
+					balls.splice (i, 1);
+					removeChild (ball);
+				}
+			}
 		}
+		
+		//**************** SPAWNS *****************************
+		
+		private function spawnObject () : void
+		{
+			spawnTimer += 0.016;  // 1 seg / 60 fps
+			if (timeToSpawn > 0){
+				if (spawnTimer >= timeToSpawn)
+				{
+					var objectFunction : int = int (MyFunctions.Random(0, 1));
+					
+					var posX : int = int (MyFunctions.Random (spawnArea, 800 - spawnArea));
+					var posY : int = int (MyFunctions.Random (spawnArea, 600 - spawnArea));
+					
+					var newHab : Hability = new Hability(objectFunction, posX, posY, 50, 50);
+					addChild(newHab);
+					gameObjects.push (newHab);
+					
+					timeToSpawn = MyFunctions.Random (initialTimeToSpawn - rangeTimeSpawn, initialTimeToSpawn + rangeTimeSpawn);
+					spawnTimer = 0;
+				}
+			}
+			else timeToSpawn = 5;
+		}
+		
+		private function spawnBall () : void
+		{
+			ballSpawnerTime += 0.016;
+			if (timeToSpawnBall > 0 && ballSpawnerTime >= timeToSpawnBall)
+			{
+				
+				ballSpawnerTime = 0;
+				
+				var newBall : Ball = new Ball(400, 300, 25, 25, Assets.getTexture("BallPic"));
+				addChild(newBall);
+				balls.push (newBall);
+			}
+		}
+		
+		// *************************************************************************
+		
+		
 	}
 
 }
