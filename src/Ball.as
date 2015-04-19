@@ -1,5 +1,7 @@
 package 
 {
+	import screens.GameScreen;
+	
 	import com.greensock.plugins.TintPlugin;
 	import flash.desktop.ClipboardFormats;
 	import flash.events.TimerEvent;
@@ -18,7 +20,9 @@ package
 		// Velocidad de la pelota
 		public var Speed : Number;
 		// Refraccion: (explicar un poco mas)
-		public var Refraction : Number =0.5;
+		public var Refraction : Number = 0.5;
+		// Movimiento permitido?
+		public var MovementEnabled : Boolean = true;
 		
 		// Movimiento en X
 		private var movementX : Number;
@@ -51,6 +55,26 @@ package
 		// Incremento en la velocidad cada vez que aumenta
 		private var speedIncrease : Number = 0.05;
 		
+		// *********** CONSTRUCTOR *****************************
+		
+		public function Ball(posX : int, posY : int, width : int, height : int, pic : Texture) 
+		{
+			super();
+			
+			movementX = 1;
+			movementY = 1;
+			Speed = 2;
+						
+			picture = new Image(pic);
+			this.x = posX;
+			this.y = posY;
+			picture.width = width;
+			picture.height = height;
+			this.addChild(picture);
+			
+			this.addEventListener(starling.events.Event.ENTER_FRAME, Move);
+		}
+		
 		
 		//********* COLISIONES *************************
 		
@@ -82,43 +106,44 @@ package
 		// Chocar y empezar colision con un objeto
 		public function CollideWith (other:Sprite) : void
 		{
+			
 			var OldX : int = oldX;
 			var OldY : int = oldY;
 			var NewX : int = x;
 			var NewY : int = y;
 			
+			GameScreen.debugg += "iep";
+			
 			if (senseX == 1)
 			{
-				OldX += picture.width;
-				NewX += picture.width;
+				OldX += width;
+				NewX += width;
 			}
 			if (senseY == 1)
 			{
-				OldY += picture.height;
-				NewY += picture.height;
+				OldY += height;
+				NewY += height;
+			}
+			
+			if (OldX > NewX && OldY > NewY)
+			{
+				var aux : int;
+				
+				aux = NewX;
+				NewX = OldX;
+				OldX = aux;
+				
+				aux = NewY;
+				NewY = OldY;
+				OldY = aux;
 			}
 			
 			Chocar (getCollisionType(OldX, OldY, NewX, NewY, other));
+			/*var colType : String = getCollisionType(OldX, OldY, NewX, NewY, other);
+			if (colType != "none") GameScreen.debugg = "";
+			Chocar (colType);*/
 			
 			StartCollisionWith(other);
-			
-			/*if (collisionObject == null)
-			{
-				if (senseX == 1)
-				{
-					var suposedY : int = int(Abs(x - other.x) * (movementY / movementX) * senseY + y);
-					if (suposedY > other.y && suposedY < other.y + other.height) Chocar ("side");
-					else Chocar("plane");
-				}
-				else
-				{
-					var suposedY : int = int(Abs(x - other.x + other.width) * (movementY / movementX) * senseY + y);
-					if (suposedY > other.y && suposedY < other.y + other.height) Chocar("side");
-					else Chocar("plane");
-				}
-				
-				StartCollisionWith (other);
-			}*/
 		}
 		
 		// mirar si aun estamos colisionando con el objeto
@@ -129,38 +154,27 @@ package
 		}
 		
 		private function getCollisionType (minX:int, minY:int, maxX:int, maxY:int, pic:Sprite) : String
-		{
-			if (minX >= maxX && minY >= maxY) return "none";
+		{		
+			if (minX >= maxX && minY >= maxY) return "none"; //*
 			
 			var xx : int = (minX + maxX) / 2;
-			var yy : int= (minY + maxY) / 2;
+			var yy : int = (minY + maxY) / 2;
 			
 			if (xx == pic.x || xx == pic.x + pic.width) return "side";
 			if (yy == pic.y || yy == pic.y + pic.height) return "plane";
 			
-			if (!MyFunctions.pointIn(xx,yy,pic))
-				return getCollisionType(xx+1, yy+1, maxX, maxY, pic);
-			return getCollisionType (minX, minY, xx-1, yy-1, pic);
-		}
-		
-		// *********** CONSTRUCTOR *****************************
-		
-		public function Ball(posX : int, posY : int, width : int, height : int, pic : Texture) 
-		{
-			super();
+			if (minX == pic.x || minX == pic.x + pic.width) return "side";
+			if (minY == pic.y || minY == pic.y + pic.height) return "plane";
 			
-			movementX = 1;
-			movementY = 1;
-			Speed = 2;
-						
-			picture = new Image(pic);
-			this.x = posX;
-			this.y = posY;
-			picture.width = width;
-			picture.height = height;
-			this.addChild(picture);
+			if (maxX == pic.x || maxX == pic.x + pic.width) return "side";
+			if (maxY == pic.y || maxY == pic.y + pic.height) return "plane";
 			
-			this.addEventListener(starling.events.Event.ENTER_FRAME, Move);
+			if (MyFunctions.Abs(maxX - minX) <= 1 && MyFunctions.Abs(maxY - minY) <= 1) return "none"; //*
+			
+			if (!MyFunctions.pointIn(xx, yy, pic))
+				return getCollisionType(xx, yy, maxX, maxY, pic);
+
+			return getCollisionType (minX, minY, xx, yy, pic);
 		}
 		
 		// ************ COMPORTAMIENTO DE LA PELOTA ***************************
@@ -168,23 +182,30 @@ package
 		// Mover pelota
 		public function Move(event:Event) : void
 		{
-			oldX = x;
-			oldY = y;
-			x += movementX * Speed;
-			y += movementY * Speed;
-			
-			timer += 0.1;
-			if (timer >= timeToIncrease)
+			if (MovementEnabled)
 			{
-				timer = 0;
-				Speed += speedIncrease;
+				oldX = x;
+				oldY = y;
+				x += movementX * Speed;
+				y += movementY * Speed;
+				
+				timer += 0.1;
+				if (timer >= timeToIncrease)
+				{
+					timer = 0;
+					Speed += speedIncrease;
+				}
 			}
 		}
 		
 		// Colisionar
 		public function Chocar(Sense : String) : void
 		{
-			if (Sense == "none") return;
+			if (Sense == "none")
+			{
+				//MovementEnabled = false;
+				return;
+			}
 			if (Sense == "side") {	
 				movementX = 2 * (1 - Refraction) * (-senseX);
 				movementY = 2 * Refraction * senseY;

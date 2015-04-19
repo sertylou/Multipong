@@ -16,7 +16,7 @@ package screens
 		
 		// Variables para el texto que sale en pantalla que nos sirve para
 		// ver valores e identificar errores a modo de debugg
-		private var debugg:String = "Hola mundo";
+		public static var debugg:String = "";
 		private var debuggText : TextField;
 		
 		// Pelotas en el juego
@@ -62,14 +62,15 @@ package screens
 			drawScreen();
 			
 			// Devolver pelota al centro o eliminarla al salirse
-			//addEventListener(Event.ENTER_FRAME, devolverPelota);
+			addEventListener(Event.ENTER_FRAME, devolverPelota);
+			spawnBall();
 			
 			// comprobar colisiones entre las pelotas y otros
 			addEventListener(Event.ENTER_FRAME, comprobarColisiones);
 			// generar objetos en la escena
-			addEventListener(Event.ENTER_FRAME, spawnObject);
+			//addEventListener(Event.ENTER_FRAME, spawnObject);
 			// generar bolas en la escena
-			addEventListener(Event.ENTER_FRAME, spawnBall);
+			//addEventListener(Event.ENTER_FRAME, spawnBall);
 			// mostrar texto de debbugg en la escena (quitar al acabar el juego)
 			addEventListener(Event.ENTER_FRAME, DebuggText);
 		}
@@ -80,12 +81,11 @@ package screens
 		{
 			// Texto para mostrar cosas
 			removeChild(debuggText);
-			debugg = "Hola";
 			debuggText = new TextField(800, 600, debugg, "Arial", 12, Color.RED);
 			this.addChild(debuggText);
 		}
 		
-				// dibujar palas
+		// dibujar palas
 		private function drawScreen():void
 		{
 			
@@ -111,6 +111,21 @@ package screens
 		}
 		
 		//********** CONTROL PELOTA **************************
+		
+		// devolver pelota al centro de la pantalla si se sale
+		private function devolverPelota (event:Event) : void
+		{
+			for (var i:int = 0; i < balls.length; ++i)
+			{
+				var ball : Ball = balls[i];
+				if (ball.x < 0 || ball.x >= 800 || ball.y < 0 || ball.y >= 600)
+				{
+					ball.x = 400;
+					ball.y = 300;
+					ball.Speed = 2;
+				}
+			}
+		}
 		
 		// comprobar colisiones entre la pelota y lo demás
 		private function comprobarColisiones (event:Event) : void
