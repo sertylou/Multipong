@@ -1,10 +1,10 @@
 package screens 
 {
 	// Debugg imports
-	import flash.media.Sound;
 	import starling.text.TextField;
 	import starling.utils.Color;
 	
+	import flash.media.Sound;
 	import starling.display.Image;
 	import starling.display.Sprite;
 	import starling.events.EnterFrameEvent;
@@ -122,7 +122,7 @@ package screens
 				{
 					ball.x = 400;
 					ball.y = 300;
-					ball.Speed = 2;
+					//ball.Speed = 2;
 				}
 			}
 		}
@@ -141,25 +141,25 @@ package screens
 					if (MyFunctions.imageCollision (leftStick, ball))
 					{
 						// Colisionar con ella
-						ball.CollideWith (leftStick);
+						ball.CollideWithStick (leftStick);
 						continue;
 					}
 					
 					if (MyFunctions.imageCollision (rightStick, ball))
 					{
-						ball.CollideWith (rightStick);
+						ball.CollideWithStick (rightStick);
 						continue;
 					}
 					
 					if (MyFunctions.imageCollision (topStick, ball))
 					{
-						ball.CollideWith (topStick);
+						ball.CollideWithStick (topStick);
 						continue;
 					}
 					
 					if (MyFunctions.imageCollision (bottomStick, ball))
 					{
-						ball.CollideWith (bottomStick);
+						ball.CollideWithStick (bottomStick);
 						continue;
 					}
 					

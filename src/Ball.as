@@ -103,6 +103,14 @@ package
 			return collisionObject != null;
 		}
 		
+		// Chocar con una pala
+		public function CollideWithStick (other:Stick)
+		{
+			other.enabled = false;
+			CollideWith(other);
+			other.enabled = true;
+		}
+		
 		// Chocar y empezar colision con un objeto
 		public function CollideWith (other:Sprite) : void
 		{
@@ -111,8 +119,6 @@ package
 			var OldY : int = oldY;
 			var NewX : int = x;
 			var NewY : int = y;
-			
-			GameScreen.debugg += "iep";
 			
 			if (senseX == 1)
 			{
@@ -125,6 +131,8 @@ package
 				NewY += height;
 			}
 			
+			var intercambiados : Boolean = false;
+			
 			if (OldX > NewX && OldY > NewY)
 			{
 				var aux : int;
@@ -136,9 +144,11 @@ package
 				aux = NewY;
 				NewY = OldY;
 				OldY = aux;
+				
+				intercambiados = true;
 			}
 			
-			Chocar (getCollisionType(OldX, OldY, NewX, NewY, other));
+			Chocar (getCollisionType(OldX, OldY, NewX, NewY, other, intercambiados));
 			/*var colType : String = getCollisionType(OldX, OldY, NewX, NewY, other);
 			if (colType != "none") GameScreen.debugg = "";
 			Chocar (colType);*/
@@ -153,7 +163,7 @@ package
 				EndCollision();
 		}
 		
-		private function getCollisionType (minX:int, minY:int, maxX:int, maxY:int, pic:Sprite) : String
+		private function getCollisionType (minX:int, minY:int, maxX:int, maxY:int, pic:Sprite, intercambiados:Boolean) : String
 		{		
 			if (minX >= maxX && minY >= maxY) return "none"; //*
 			
@@ -172,9 +182,15 @@ package
 			if (MyFunctions.Abs(maxX - minX) <= 1 && MyFunctions.Abs(maxY - minY) <= 1) return "none"; //*
 			
 			if (!MyFunctions.pointIn(xx, yy, pic))
-				return getCollisionType(xx, yy, maxX, maxY, pic);
-
-			return getCollisionType (minX, minY, xx, yy, pic);
+			{
+				if (!intercambiados)
+					return getCollisionType(xx, yy, maxX, maxY, pic, intercambiados);
+				return getCollisionType (minX, minY, xx, yy, pic, intercambiados);
+			}
+			
+			if (!intercambiados)
+				return getCollisionType (minX, minY, xx, yy, pic, intercambiados);
+			return getCollisionType(xx, yy, maxX, maxY, pic, intercambiados);
 		}
 		
 		// ************ COMPORTAMIENTO DE LA PELOTA ***************************

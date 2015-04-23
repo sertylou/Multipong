@@ -7,6 +7,15 @@ package
 	import starling.textures.Texture;
 	public class Assets 
 	{
+		[Embed(source = "../media/pictures/MenuBackground.png")]
+		public static const menuBackgroundPic:Class;
+		
+		[Embed(source = "../media/pictures/SurvivalButton.png")]
+		public static const SurvivalModeButton:Class;
+		
+		[Embed(source = "../media/pictures/TimeButton.png")]
+		public static const TimeModeButton:Class;
+		
 		[Embed(source = "../media/pictures/ball.png")]
 		public static const BallPic:Class;
 		
