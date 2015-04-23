@@ -1,6 +1,5 @@
 package
 {
-	import screens.Menu;
 	import screens.GameScreen;
 	import starling.display.Sprite;
 	import starling.events.Event;
@@ -22,9 +21,8 @@ package
 		{
 			trace("starling framework initialized!");
 			
-			//var initialScreen : Menu = new Menu();
-			var initialScreen : GameScreen = new GameScreen();
-			this.addChild(initialScreen);
+			gameScreen = new GameScreen();
+			this.addChild(gameScreen);
 		}
 	}
 }

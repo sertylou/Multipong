@@ -16,8 +16,6 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="\Users\hsharma\Desktop\PrimaryFeather-Starling-Framework-86fb79d\starling\src" />
-    <class path="\Users\hsharma\Desktop\mrdoob-Hi-ReS-Stats-ad6da5d\src" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -82,9 +80,6 @@
     <asset path="media\pictures\Block.png" />
     <asset path="media\pictures\SpeedRay.jpg" />
     <asset path="media\pictures\FireBall.jpg" />
-    <asset path="media\pictures\MenuBackground.png" />
-    <asset path="media\pictures\SurvivalButton.png" />
-    <asset path="media\pictures\TimeButton.png" />
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>

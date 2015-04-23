@@ -1,7 +1,5 @@
 package 
 {
-	import screens.GameScreen;
-	
 	import com.greensock.plugins.TintPlugin;
 	import flash.desktop.ClipboardFormats;
 	import flash.events.TimerEvent;
@@ -12,18 +10,19 @@ package
 	import starling.events.EnterFrameEvent;
 	import starling.events.Event;
 	import starling.textures.Texture;
+	import screens.GameScreen;
 	
 	public class Ball extends Sprite 
 	{
 		//******** ATRIBUTOS ****************
 		
+		private var pantallaJuego : GameScreen;
+		
 		// Velocidad de la pelota
 		public var Speed : Number;
 		// Refraccion: (explicar un poco mas)
 		public var Refraction : Number = 0.5;
-		// Movimiento permitido?
-		public var MovementEnabled : Boolean = true;
-		
+
 		// Movimiento en X
 		private var movementX : Number;
 		// Obtener el sentido en X: 1:Derecha -1:Izquierda
@@ -57,9 +56,10 @@ package
 		
 		// *********** CONSTRUCTOR *****************************
 		
-		public function Ball(posX : int, posY : int, width : int, height : int, pic : Texture) 
+		public function Ball(posX : int, posY : int, width : int, height : int, pic : Texture, pantalla: GameScreen) 
 		{
 			super();
+			pantallaJuego = pantalla;
 			
 			movementX = 1;
 			movementY = 1;
@@ -73,8 +73,14 @@ package
 			this.addChild(picture);
 			
 			this.addEventListener(starling.events.Event.ENTER_FRAME, Move);
+			this.addEventListener(starling.events.Event.ENTER_FRAME, ControlHabilities);
 		}
 		
+		//**********GET*******************************
+		public function GetSprite():Image 
+		{
+			return this.picture;
+		}
 		
 		//********* COLISIONES *************************
 		
@@ -103,57 +109,47 @@ package
 			return collisionObject != null;
 		}
 		
-		// Chocar con una pala
-		public function CollideWithStick (other:Stick)
-		{
-			other.enabled = false;
-			CollideWith(other);
-			other.enabled = true;
-		}
-		
 		// Chocar y empezar colision con un objeto
 		public function CollideWith (other:Sprite) : void
 		{
-			
-			var OldX : int = oldX;
+			/*var OldX : int = oldX;
 			var OldY : int = oldY;
 			var NewX : int = x;
 			var NewY : int = y;
 			
 			if (senseX == 1)
 			{
-				OldX += width;
-				NewX += width;
+				OldX += picture.width;
+				NewX += picture.width;
 			}
 			if (senseY == 1)
 			{
-				OldY += height;
-				NewY += height;
+				OldY += picture.height;
+				NewY += picture.height;
 			}
 			
-			var intercambiados : Boolean = false;
+			Chocar (getCollisionType(OldX, OldY, NewX, NewY, other));
 			
-			if (OldX > NewX && OldY > NewY)
+			StartCollisionWith(other);*/
+			
+			if (collisionObject == null)
 			{
-				var aux : int;
+				var suposedY : int;
+				if (senseX == 1)
+				{
+					suposedY = int(MyFunctions.Abs(x - other.x) * (movementY / movementX) * senseY + y);
+					if (suposedY > other.y && suposedY < other.y + other.height) Chocar ("side");
+					else Chocar("plane");
+				}
+				else
+				{
+					suposedY = int(MyFunctions.Abs(x - other.x + other.width) * (movementY / movementX) * senseY + y);
+					if (suposedY > other.y && suposedY < other.y + other.height) Chocar("side");
+					else Chocar("plane");
+				}
 				
-				aux = NewX;
-				NewX = OldX;
-				OldX = aux;
-				
-				aux = NewY;
-				NewY = OldY;
-				OldY = aux;
-				
-				intercambiados = true;
+				StartCollisionWith (other);
 			}
-			
-			Chocar (getCollisionType(OldX, OldY, NewX, NewY, other, intercambiados));
-			/*var colType : String = getCollisionType(OldX, OldY, NewX, NewY, other);
-			if (colType != "none") GameScreen.debugg = "";
-			Chocar (colType);*/
-			
-			StartCollisionWith(other);
 		}
 		
 		// mirar si aun estamos colisionando con el objeto
@@ -163,65 +159,45 @@ package
 				EndCollision();
 		}
 		
-		private function getCollisionType (minX:int, minY:int, maxX:int, maxY:int, pic:Sprite, intercambiados:Boolean) : String
-		{		
-			if (minX >= maxX && minY >= maxY) return "none"; //*
+		private function getCollisionType (minX:int, minY:int, maxX:int, maxY:int, pic:Sprite) : String
+		{
+			if (minX >= maxX && minY >= maxY) return "none";
 			
 			var xx : int = (minX + maxX) / 2;
-			var yy : int = (minY + maxY) / 2;
+			var yy : int= (minY + maxY) / 2;
 			
 			if (xx == pic.x || xx == pic.x + pic.width) return "side";
 			if (yy == pic.y || yy == pic.y + pic.height) return "plane";
 			
-			if (minX == pic.x || minX == pic.x + pic.width) return "side";
-			if (minY == pic.y || minY == pic.y + pic.height) return "plane";
-			
-			if (maxX == pic.x || maxX == pic.x + pic.width) return "side";
-			if (maxY == pic.y || maxY == pic.y + pic.height) return "plane";
-			
-			if (MyFunctions.Abs(maxX - minX) <= 1 && MyFunctions.Abs(maxY - minY) <= 1) return "none"; //*
-			
-			if (!MyFunctions.pointIn(xx, yy, pic))
-			{
-				if (!intercambiados)
-					return getCollisionType(xx, yy, maxX, maxY, pic, intercambiados);
-				return getCollisionType (minX, minY, xx, yy, pic, intercambiados);
-			}
-			
-			if (!intercambiados)
-				return getCollisionType (minX, minY, xx, yy, pic, intercambiados);
-			return getCollisionType(xx, yy, maxX, maxY, pic, intercambiados);
+			if (!MyFunctions.pointIn(xx,yy,pic))
+				return getCollisionType(xx+1, yy+1, maxX, maxY, pic);
+			return getCollisionType (minX, minY, xx-1, yy-1, pic);
 		}
+		
+		
 		
 		// ************ COMPORTAMIENTO DE LA PELOTA ***************************
 		
 		// Mover pelota
 		public function Move(event:Event) : void
 		{
-			if (MovementEnabled)
+			oldX = x;
+			oldY = y;
+			x += movementX * Speed;
+			y += movementY * Speed;
+			
+			timer += 0.1;
+			if (timer >= timeToIncrease)
 			{
-				oldX = x;
-				oldY = y;
-				x += movementX * Speed;
-				y += movementY * Speed;
-				
-				timer += 0.1;
-				if (timer >= timeToIncrease)
-				{
-					timer = 0;
-					Speed += speedIncrease;
-				}
+				timer = 0;
+				Speed += speedIncrease;
 			}
 		}
 		
 		// Colisionar
 		public function Chocar(Sense : String) : void
 		{
-			if (Sense == "none")
-			{
-				//MovementEnabled = false;
-				return;
-			}
+			if (Sense == "none") return;
 			if (Sense == "side") {	
 				movementX = 2 * (1 - Refraction) * (-senseX);
 				movementY = 2 * Refraction * senseY;
@@ -249,6 +225,14 @@ package
 			habsTimers.push (0);
 		}
 		
+		public function HasHability(hab: String):Boolean 
+		{
+			var has: int = activeHabs.indexOf(hab);
+			if (has == -1)
+				return false;
+			return true;
+		}
+		
 		
 		// Manejar habilidades activas
 		private function ControlHabilities () : void
@@ -263,7 +247,9 @@ package
 					switch (hab)
 					{
 						case "speed":
-							Speed /= 1.5;
+							Speed -= 4;
+							break;
+						case "fire":
 							break;
 					}
 					
@@ -272,6 +258,7 @@ package
 					--i;
 					l = activeHabs.length;
 				}
+				
 			}
 		}
 		

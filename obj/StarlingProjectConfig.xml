@@ -33,15 +33,15 @@
     <accessible>true</accessible>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>C:\Users\Oscar\Desktop\Nueva carpeta\src</path-element>
-      <path-element>C:\Libraries\ActionScript\Gamua-Starling-Framework-c414de1\starling\src</path-element>
-      <path-element>C:\Libraries\ActionScript\GreenSock-AS3</path-element>
-      <path-element>C:\Libraries\ActionScript\Hi-ReS-Stats-master\src</path-element>
+      <path-element>C:\Users\Usuario\Desktop\Clase\Web\ProyectoWeb\Multipong\src</path-element>
+      <path-element>C:\Users\Usuario\Desktop\ProgramasClase\FlashDevelop\Gamua-Starling-Framework-v1.6-0-gc414de1\Gamua-Starling-Framework-c414de1\starling\src</path-element>
+      <path-element>C:\Users\Usuario\Desktop\ProgramasClase\FlashDevelop\Hi-ReS-Stats-master\Hi-ReS-Stats-master\src</path-element>
+      <path-element>C:\Users\Usuario\Desktop\ProgramasClase\FlashDevelop\GreenSock-AS3\GreenSock-AS3</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Users\Oscar\Desktop\Nueva carpeta\src\StarlingProject.as</path-element>
+    <path-element>C:\Users\Usuario\Desktop\Clase\Web\ProyectoWeb\Multipong\src\StarlingProject.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>

@@ -1,10 +1,10 @@
 package screens 
 {
 	// Debugg imports
+	import flash.media.Sound;
 	import starling.text.TextField;
 	import starling.utils.Color;
 	
-	import flash.media.Sound;
 	import starling.display.Image;
 	import starling.display.Sprite;
 	import starling.events.EnterFrameEvent;
@@ -16,11 +16,19 @@ package screens
 		
 		// Variables para el texto que sale en pantalla que nos sirve para
 		// ver valores e identificar errores a modo de debugg
-		public static var debugg:String = "";
+		public var debugg:String = "Hola mundo";
 		private var debuggText : TextField;
 		
+		private function DebuggText () : void
+		{
+			// Texto para mostrar cosas
+			removeChild(debuggText);
+			debuggText = new TextField(800, 600, debugg, "Arial", 12, Color.RED);
+			this.addChild(debuggText);
+		}
+		
 		// Pelotas en el juego
-		private var balls : Vector.<Ball> = new <Ball>[];
+		public static var balls : Vector.<Ball> = new <Ball>[];
 		
 		// Palas del jugador
 		private var leftStick : Stick;
@@ -52,6 +60,13 @@ package screens
 		private var timeToSpawnBall : Number = 4;
 		// Temporizador que se va incrementando
 		private var ballSpawnerTime : Number = 5;
+		// Cantidad Muro
+		public static var countWall : int = 0;
+		// Bool SpeedRay
+		public static var boolRay : Boolean = false;
+		// Bool FireBall
+		public static var boolFire : Boolean = false;
+		
 		
 		//************* CONSTRUCTOR ****************************************
 		
@@ -62,30 +77,21 @@ package screens
 			drawScreen();
 			
 			// Devolver pelota al centro o eliminarla al salirse
-			addEventListener(Event.ENTER_FRAME, devolverPelota);
-			spawnBall();
+			//addEventListener(Event.ENTER_FRAME, devolverPelota);
 			
 			// comprobar colisiones entre las pelotas y otros
 			addEventListener(Event.ENTER_FRAME, comprobarColisiones);
 			// generar objetos en la escena
-			//addEventListener(Event.ENTER_FRAME, spawnObject);
+			addEventListener(Event.ENTER_FRAME, spawnObject);
 			// generar bolas en la escena
-			//addEventListener(Event.ENTER_FRAME, spawnBall);
+			addEventListener(Event.ENTER_FRAME, spawnBall);
 			// mostrar texto de debbugg en la escena (quitar al acabar el juego)
 			addEventListener(Event.ENTER_FRAME, DebuggText);
 		}
 		
 		//*************** SYSTEM FUNCTIONALITY **************************
 		
-		private function DebuggText () : void
-		{
-			// Texto para mostrar cosas
-			removeChild(debuggText);
-			debuggText = new TextField(800, 600, debugg, "Arial", 12, Color.RED);
-			this.addChild(debuggText);
-		}
-		
-		// dibujar palas
+				// dibujar palas
 		private function drawScreen():void
 		{
 			
@@ -112,25 +118,12 @@ package screens
 		
 		//********** CONTROL PELOTA **************************
 		
-		// devolver pelota al centro de la pantalla si se sale
-		private function devolverPelota (event:Event) : void
-		{
-			for (var i:int = 0; i < balls.length; ++i)
-			{
-				var ball : Ball = balls[i];
-				if (ball.x < 0 || ball.x >= 800 || ball.y < 0 || ball.y >= 600)
-				{
-					ball.x = 400;
-					ball.y = 300;
-					//ball.Speed = 2;
-				}
-			}
-		}
-		
 		// comprobar colisiones entre la pelota y lo demás
 		private function comprobarColisiones (event:Event) : void
 		{
-			for (var i:int = 0; i < balls.length; ++i)
+			var l : int = balls.length;
+			
+			for (var i:int = 0; i < l; ++i)
 			{
 				var ball : Ball = balls[i];
 				
@@ -141,38 +134,51 @@ package screens
 					if (MyFunctions.imageCollision (leftStick, ball))
 					{
 						// Colisionar con ella
-						ball.CollideWithStick (leftStick);
+						ball.CollideWith (leftStick);
 						continue;
 					}
 					
 					if (MyFunctions.imageCollision (rightStick, ball))
 					{
-						ball.CollideWithStick (rightStick);
+						ball.CollideWith (rightStick);
 						continue;
 					}
 					
 					if (MyFunctions.imageCollision (topStick, ball))
 					{
-						ball.CollideWithStick (topStick);
+						ball.CollideWith (topStick);
 						continue;
 					}
 					
 					if (MyFunctions.imageCollision (bottomStick, ball))
 					{
-						ball.CollideWithStick (bottomStick);
+						ball.CollideWith (bottomStick);
 						continue;
 					}
 					
 					// Comprobar colision con cada una de las otras pelotas
 					var j : int = 0;
 					
-					for (j = 0; j < balls.length; ++j)
+					for (j = 0; j < l; ++j)
 					{
 						if (j != i && MyFunctions.imageCollision(balls[j], ball))
 						{
-							ball.CollideWith (balls[i]);
-							balls[i].CollideWith (ball);
-							continue;
+							if (ball.HasHability("fire"))					
+							{
+								removeChild(balls[j]);
+								balls.splice(j, 1);
+								if (i > j)
+									--i;
+								--j;
+								--l;
+							}
+							else
+							{
+								ball.CollideWith (balls[i]);
+								balls[i].CollideWith (ball);
+								continue;
+							}
+							
 						}
 					}
 						
@@ -209,14 +215,58 @@ package screens
 		private function spawnObject () : void
 		{
 			spawnTimer += 0.016;  // 1 seg / 60 fps
+			debugg = countWall.toString();
 			if (timeToSpawn > 0){
 				if (spawnTimer >= timeToSpawn)
 				{
-					var objectFunction : int = int (MyFunctions.Random(0, 1));
+					var objectFunction : int = int (MyFunctions.Random(0, 2));
+					if (objectFunction == 0)
+					{
+						if (countWall >= 5) 
+							return;
+						else
+							countWall ++;
+					}
+					if (objectFunction == 1)
+					{
+						if (boolRay)
+							return;
+						else
+							boolRay = true;
+					}
+					if (objectFunction == 2)
+					{
+						if (boolFire)
+							return;
+						else
+							boolFire = true;
+					}
 					
 					var posX : int = int (MyFunctions.Random (spawnArea, 800 - spawnArea));
 					var posY : int = int (MyFunctions.Random (spawnArea, 600 - spawnArea));
 					
+					//Spawn sin montar habilidades
+					var noDibuja : Boolean = true;
+					if (gameObjects.length > 0)
+					{
+						while (noDibuja) 
+						{
+							for (var i:int = 0; i < gameObjects.length; ++i)
+							{
+								if (MyFunctions.imaginaryCollision(posX, posY, 50, 50, gameObjects[i]))
+								{
+									posX = MyFunctions.Random (spawnArea, 800 - spawnArea);
+									posY = MyFunctions.Random (spawnArea, 600 - spawnArea);
+									break;
+								}
+							}
+							if (!MyFunctions.imaginaryCollision(posX, posY, 50, 50, gameObjects[gameObjects.length-1]))
+							{
+								noDibuja = false;
+							}	
+						}
+					}						
+						
 					var newHab : Hability = new Hability(objectFunction, posX, posY, 50, 50);
 					addChild(newHab);
 					gameObjects.push (newHab);
@@ -236,7 +286,7 @@ package screens
 				
 				ballSpawnerTime = 0;
 				
-				var newBall : Ball = new Ball(400, 300, 25, 25, Assets.getTexture("BallPic"));
+				var newBall : Ball = new Ball(400, 300, 25, 25, Assets.getTexture("BallPic"), this);
 				addChild(newBall);
 				balls.push (newBall);
 			}
