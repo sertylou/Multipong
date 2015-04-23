@@ -15,7 +15,6 @@ package
 		private var position : String;
 		private var moveDirection : int;
 		public function get DeltaMovement () : Number { return moveDirection * Speed; }
-		public var enabled : Boolean = true;
 		
 		private var _min : Number;
 		private var _max : Number;
@@ -115,7 +114,7 @@ package
 		
 		private function Move (event:Event) :void
 		{
-			if (enabled && keyPressed)
+			if (keyPressed)
 			{
 				if (position == "top" || position == "bottom")
 				{
